@@ -1,0 +1,24 @@
+[[source]]
+url = "https://pypi.org/simple"
+verify_ssl = true
+name = "pypi"
+
+[packages]
+fastapi = {extras = ["all"], version = "*"}
+python-dotenv = "*"
+passlib = {extras = ["bcrypt"], version = "*"}
+odmantic = "*"
+python-jose = {extras = ["cryptography"], version = "*"}
+pydantic = {extras = ["email"], version = "*"}
+
+[dev-packages]
+black = "*"
+
+[scripts]
+server = "python start.py"
+
+[requires]
+python_version = "3.9"
+
+[pipenv]
+allow_prereleases = true

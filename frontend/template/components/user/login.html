@@ -1,0 +1,39 @@
+{% extends 'layout/base.html' %} {% from 'macros/inputMacro.html' import input%}
+{% block title %}Login{% endblock title %} {%block content %} 
+{% if message !="" %}
+{%with message=message, type="success"%}
+ {% include 'components/generic/alert.html' %}
+{%endwith%} 
+{% endif %}
+{% if error !="" %}
+{%with message=error, type="danger"%} 
+{% include'components/generic/alert.html' %} 
+{%endwith%}
+{% endif %}
+
+
+<section class="section">
+  <h1 class="title has-text-centered has-text-capiterlized">login</h1>
+  <div class="columns">
+    <div class="column"></div>
+    <div class="column is-three-quarters">
+      <div class="card">
+        <div class="card-content">
+          <div class="content">
+            <form action="{{request.url_for('user_login')}}" method="post">
+              {{input(placeholder="Email", name="email", type="email",
+              error=errors.email, value=user.email)}}
+              {{input(placeholder="Password", name="password", type="password",
+              error=errors.password, value=user.password)}}
+              <button type="submit" class="has-text-capiterlized button full">
+                login
+              </button>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="column"></div>
+  </div>
+</section>
+{% endblock content%}

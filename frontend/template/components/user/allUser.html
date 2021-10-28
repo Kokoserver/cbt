@@ -1,0 +1,51 @@
+{% extends 'layout/base.html' %} {% from 'macros/inputMacro.html' import input%}
+{% block title %}Login{% endblock title %} {%block content %}
+<!-- {% if message !="" %}
+{%with message=message, type="success"%}
+{% include 'components/generic/alert.html' %}
+{%endwith%}
+{% endif %}
+{% if error !="" %}
+{%with message=error, type="danger"%}
+{% include'components/generic/alert.html' %}
+{%endwith%}
+{% endif %} -->
+<div class="container section">
+     <table class="table">
+          <thead>
+               <tr>
+                    <th><abbr title="sn">SN</abbr></th>
+                    <th><abbr title="exam No">exam No</abbr></th>
+                    <th><abbr title="firstname">firstname</abbr></th>
+                    <th><abbr title="lastname">lastname</abbr></th>
+                    <th><abbr title="email">email</abbr></th>
+                    <th><abbr title="phone No">phone No</abbr></th>
+                    <th><abbr title="Drawn"></abbr></th>
+                    <th><abbr title="Drawn"></abbr></th>
+               </tr>
+          </thead>
+          <tbody>
+               {% for user in users %}
+               <tr>
+                    <th><strong>{{index}}</strong></th>
+                    </td>
+                    <td>{{user.exam_No}}</td>
+                    <td>{{user.firstname}}</td>
+                    <td>{{user.lastname}}</td>
+                    <td>{{user.email}}</td>
+                    <td>{{user.phone}}</td>
+                    <td><a class="button" href="/user/{{user.id}}}/details">Edit</a> <a class="button"
+                         href="/user/{{user.id}}">delete</a></td>
+                    </tr>
+               {% endfor %}
+
+          </tbody>
+     </table>
+     <div class="container">
+          <nav class="pagination" role="navigation" aria-label="pagination">
+               <a class="pagination-previous" href="/user/?skip=-5">Previous</a>
+               <a class="pagination-next" href="/user/?skip=5">Next page</a>
+          </nav>
+     </div>
+</div>
+{% endblock content%}
