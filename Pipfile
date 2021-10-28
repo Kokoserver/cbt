@@ -7,9 +7,14 @@ name = "pypi"
 fastapi = {extras = ["all"], version = "*"}
 python-dotenv = "*"
 passlib = {extras = ["bcrypt"], version = "*"}
-odmantic = "*"
 python-jose = {extras = ["cryptography"], version = "*"}
 pydantic = {extras = ["email"], version = "*"}
+numpy = "*"
+pandas = "*"
+umongo = {extras = ["motor"], version = "*"}
+odmantic = "*"
+twilio = "*"
+vonage = "*"
 
 [dev-packages]
 black = "*"

@@ -1,16 +1,16 @@
 from typing import Optional
 from datetime import datetime, timedelta
 from fastapi import HTTPException, status, Depends
-from odmantic import ObjectId
-from backend.user.model import TokenData
-from backend.user.schema import User
+from repository.db import DATABASE
+from backend.model.userModel import TokenData
+from backend.schema.userSchema import User
 from fastapi.security import OAuth2PasswordBearer
 from jose import JWTError, jwt
 from .config import ALGORITHM, ACCESS_TOKEN_EXPIRE_MINUTES, SECRET_KEY
-from repository.db_operations.find_user import User_operations
-from repository.utils import OAuth2PasswordBearerWithCookie
 
-oauth2_scheme = OAuth2PasswordBearerWithCookie(tokenUrl="api/user/authenticate")
+
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="api/user/authenticate")
+
 
 def create_access_token(data: User, expires_delta: Optional[timedelta] = None):
     user_data = data.dict()
@@ -38,11 +38,10 @@ async def get_current_user(token: str = Depends(oauth2_scheme)):
         user_data = payload.get("subs")
         if not user_data:
             raise credentials_exception
-        token_data = TokenData(id=user_data["id"])
+        token_data = TokenData(email=user_data["email"])
     except JWTError:
         raise credentials_exception
-    user = await User_operations.find_user_by_ID(user_id=ObjectId(token_data.id))
+    user = await DATABASE.find_one(User, User.email == token_data.email)
     if not user:
         raise credentials_exception
     return user
-

@@ -1,35 +1,71 @@
-from typing import Optional, Dict
-from fastapi.openapi.models import OAuthFlows as OAuthFlowsModel
-from fastapi.security.utils import get_authorization_scheme_param
-from fastapi.requests import Request
-from fastapi.security import OAuth2
-from fastapi import status, HTTPException
+import json
+import pandas as pd
+from fastapi.responses import JSONResponse
 
 
-class OAuth2PasswordBearerWithCookie(OAuth2):
-    def __init__(
-        self,
-        tokenUrl: str,
-        scheme_name: Optional[str] = None,
-        scopes: Optional[Dict[str, str]] = None,
-        auto_error: bool = True,
-    ):
-        if not scopes:
-            scopes = {}
-        flows = OAuthFlowsModel(password={"tokenUrl": tokenUrl, "scopes": scopes})
-        super().__init__(flows=flows, scheme_name=scheme_name, auto_error=auto_error)
+def get_user_claims(get_user_details):
+    return json.loads(get_user_details)
 
-    async def __call__(self, request: Request) -> Optional[str]:
-        authorization: str = request.cookies.get("access_token")  #changed to accept access token from httpOnly Cookie
 
-        scheme, param = get_authorization_scheme_param(authorization)
-        if not authorization or scheme.lower() != "bearer":
-            if self.auto_error:
-                raise HTTPException(
-                    status_code=status.HTTP_401_UNAUTHORIZED,
-                    detail="Not authenticated",
-                    headers={"WWW-Authenticate": "Bearer"},
-                )
-            else:
-                return None
-        return param
+def convert_csv_to_list_dict(csv_file, model):
+    df = pd.read_csv(csv_file.file)
+    return [model(**row.to_dict()).dict() for index, row in df.iterrows()]
+
+
+def convert_to_list_dict__to_excel(listOfDict):
+    return pd.DataFrame.from_dict(listOfDict)
+
+    # return [model(**row.to_dict()).dict() for index, row in df.iterrows()]
+
+
+def get_message(root: str, fields: list, error_message: str, return_message=None):
+    return_message = return_message or {}
+
+    if root not in return_message:
+        return_message[root] = {}
+
+    for i, field in enumerate(fields):
+        if len(fields) == 1:
+            return_message[root].update({field: error_message})
+        else:
+            new_fields = fields.copy()
+            del new_fields[i]
+            response = get_message(
+                root=field,
+                fields=new_fields,
+                error_message=error_message,
+                return_message=return_message[root],
+            )
+            return_message[root].update(response)
+            break
+
+    return return_message
+
+
+async def validation_bad_request_exception_handler(request, exc):
+    message = {}
+    for x in exc.errors():
+        fields = [entry for entry in x["loc"] if entry != "body"]
+
+        if len(fields) == 0:
+            message.update({"error": "invalid request"})
+        elif len(fields) == 1:
+            message.update({fields[0]: x["msg"]})
+        else:
+            # for dict / list with errors inside it
+            field_root = fields[0]
+            del fields[0]
+
+            message = get_message(
+                root=field_root,
+                fields=fields,
+                error_message=x["msg"],
+                return_message=message,
+            )
+
+    return JSONResponse(
+        status_code=400,
+        content={
+            "message": message,
+        },
+    )
